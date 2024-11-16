@@ -6,9 +6,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from collections import defaultdict
 from pprint import pprint
-'''
-Версия где я добавлял в таблицу каждый раз готовый кусок
-'''
+
 class GeneratePdf():
 	
 	PADDING_ZERO = [
