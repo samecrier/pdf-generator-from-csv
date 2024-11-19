@@ -125,7 +125,36 @@ class GeneratePdf():
 		else:
 			current_model = None
 		return current_model
-	
+	def calculate_table_height_with_span(self, table):
+		"""
+		Рассчитывает высоту таблицы с учетом вертикального объединения (SPAN).
+		"""
+		colWidths = self.col_widths_points
+		total_height = 0
+		row_heights = [0] * len(table._cellvalues)  # Для сохранения высот строк
+
+		for row_idx, row in enumerate(table._cellvalues):
+			for col_idx, cell in enumerate(row):
+				if isinstance(cell, Paragraph):
+					_, height = cell.wrap(colWidths[col_idx], 0)
+					row_heights[row_idx] = max(row_heights[row_idx], height)
+				elif isinstance(cell, str):
+					# Задаем стандартную высоту для строк с текстом
+					row_heights[row_idx] = max(row_heights[row_idx], 12)
+
+		# Обрабатываем SPAN
+		for cmd in table._tblStyle.commands:
+			if cmd[0] == 'SPAN':
+				(start_col, start_row), (end_col, end_row) = cmd[1], cmd[2]
+				span_height = sum(row_heights[start_row:end_row + 1])
+				max_height = max(row_heights[start_row:end_row + 1])
+				for i in range(start_row, end_row + 1):
+					row_heights[i] = 0  # Обнуляем высоты объединенных строк
+				row_heights[start_row] = max(span_height, max_height)  # Задаем высоту для первой строки
+
+		total_height = sum(row_heights)
+		return total_height
+
 	def generate_test_table(self, *args):
 		list_for_test_table = []
 		for arg in args:
@@ -134,6 +163,12 @@ class GeneratePdf():
 		value_for_styles = [row[0] for row in list_for_test_table]
 		test_data_row = [row[1:] for row in list_for_test_table]
 		test_table = Table(test_data_row, colWidths=self.col_widths_points)
+		c_p = [] #8
+		c_fb = [] #9
+		c_fd = [] #10
+		c_rb = [] #11
+		c_rd = [] #12
+
 		for i in range(len(value_for_styles)):
 			if value_for_styles[i] == 'header':
 				test_table.setStyle(TableStyle([
@@ -146,7 +181,6 @@ class GeneratePdf():
 				]))
 		
 			if value_for_styles[i] == 'brand':
-				#print('стили для бренда')
 				test_table.setStyle(TableStyle([
 					('BACKGROUND', (0, i), (-1, i), colors.darkkhaki),
 					('GRID', (0, i), (-1, i), 0.5, colors.black),
@@ -160,7 +194,6 @@ class GeneratePdf():
 				]))
 			
 			elif value_for_styles[i] == 'model':
-				#print('стили для модел')
 				test_table.setStyle(TableStyle([
 					('BACKGROUND', (0, i), (-1, i), colors.lightcoral),
 					('GRID', (0, i), (-1, i), 0.5, 'black'),
@@ -173,7 +206,6 @@ class GeneratePdf():
 					('BOTTOMPADDING', (0, i), (-1, i), 0),
 				]))
 			elif value_for_styles[i] == 'parts':
-				#print('стили для parts')
 				test_table.setStyle(TableStyle([
 					('BACKGROUND', (0, i), (-1, i), 'rgb(255, 249, 215)'),
 					('GRID', (0, i), (-1, i), 0.5, 'black'),
@@ -184,6 +216,91 @@ class GeneratePdf():
 					('TOPPADDING', (0, i), (-1, i), 1),
 					('BOTTOMPADDING', (0, i), (-1, i), 1),
 				]))
+
+		for a, row in enumerate(list_for_test_table):
+			for i, cell in enumerate(row):
+				if i == 8: #c_p
+					if isinstance(cell, Paragraph):
+						part_text = list_for_test_table[a][i].text
+						if part_text != '':
+							if part_text in c_p:
+								test_table.setStyle(TableStyle([
+								('SPAN', (i-1, a-len(c_p)), (i-1, a)),
+								('GRID', (i-1, a-len(c_p)), (i-1, a), 0.5, 'black'),
+								]))
+								c_p.append(part_text)
+							elif c_p == []:
+								c_p.append(part_text)
+							else:
+								c_p = [part_text]
+						else:
+							c_p = []
+				if i == 9: #c_fb
+					if isinstance(cell, Paragraph):
+						part_text = list_for_test_table[a][i].text
+						if part_text != '':
+							if part_text in c_fb:
+								test_table.setStyle(TableStyle([
+								('SPAN', (i-1, a-len(c_fb)), (i-1, a)),
+								('GRID', (i-1, a-len(c_fb)), (i-1, a), 0.5, 'black'),
+								]))
+								c_fb.append(part_text)
+							elif c_fb == []:
+								c_fb.append(part_text)
+							else:
+								c_fb = [part_text]
+						else:
+							c_fb = []
+				if i == 10: #c_fd
+					if isinstance(cell, Paragraph):
+						part_text = list_for_test_table[a][i].text
+						if part_text != '':
+							if part_text in c_fd:
+								test_table.setStyle(TableStyle([
+								('SPAN', (i-1, a-len(c_fd)), (i-1, a)),
+								('GRID', (i-1, a-len(c_fd)), (i-1, a), 0.5, 'black'),
+								]))
+								c_fd.append(part_text)
+							elif c_fd == []:
+								c_fd.append(part_text)
+							else:
+								c_fd = [part_text]
+						else:
+							c_fd = []
+				if i == 11: #c_rb
+					if isinstance(cell, Paragraph):
+						part_text = list_for_test_table[a][i].text
+						if part_text != '':
+							if part_text in c_rb:
+								test_table.setStyle(TableStyle([
+								('SPAN', (i-1, a-len(c_rb)), (i-1, a)),
+								('GRID', (i-1, a-len(c_rb)), (i-1, a), 0.5, 'black'),
+								]))
+								c_rb.append(part_text)
+							elif c_rb == []:
+								c_rb.append(part_text)
+							else:
+								c_rb = [part_text]
+						else:
+							c_rb = []
+				if i == 12: #c_rd
+					if isinstance(cell, Paragraph):
+						part_text = list_for_test_table[a][i].text
+						if part_text != '':
+							if part_text in c_rd:
+								test_table.setStyle(TableStyle([
+								('SPAN', (i-1, a-len(c_rd)), (i-1, a)),
+								('GRID', (i-1, a-len(c_rd)), (i-1, a), 0.5, 'black'),
+								]))
+								c_rd.append(part_text)
+							elif c_rd == []:
+								c_rd.append(part_text)
+							else:
+								c_rd = [part_text]
+						else:
+							c_rd = []
+
+		print(self.calculate_table_height_with_span(test_table))
 		return test_table
 
 	def generate_grouped_model_data(self, model_list):
@@ -287,16 +404,31 @@ class GeneratePdf():
 				while model_data:
 					input_model_name = False
 					test_table = self.generate_test_table(page_list)
-					height_test_table = self.get_element_height(test_table)
-					while self.height >= height_test_table:
+					test_table_height = self.get_element_height(test_table)
+					while self.height >= test_table_height:
 						if not model_data:
 							break
 						if input_model_name == False:
 							model_name_row = self.generate_model_name_row(model_name)
-							page_list.append(model_name_row)
-							input_model_name = True
+							new_row = ['parts'] + model_data[0] #абсолютно 0 идей почему [new_row] до вызова функции не работает, а во время - работает
+							test_table = self.generate_test_table(page_list, [model_name_row], [new_row])
+							test_table_height = self.get_element_height(test_table)
+							if self.height >= test_table_height:
+								model_data.pop(0)
+								page_list.append(model_name_row)
+								page_list.append(new_row)
+								input_model_name = True
+							else:
+								self.generate_page(page_list)
+								self.move_to_next_page()
+								page_list = self.generate_template_list()
+								ended_page = None
+								break
+						try:
+							new_row = ['parts'] + model_data[0] #абсолютно 0 идей почему [new_row] до вызова функции не работает, а во время - работает
+						except IndexError:
+							break
 						
-						new_row = ['parts'] + model_data[0] #абсолютно 0 идей почему [new_row] до вызова функции не работает, а во время - работает
 						test_table = self.generate_test_table(page_list, [new_row])
 						test_table_height = self.get_element_height(test_table)
 						if self.height >= test_table_height:
