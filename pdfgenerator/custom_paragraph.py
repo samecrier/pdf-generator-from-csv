@@ -3,17 +3,16 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 
 class CustomParagraph(Paragraph):
 	def __init__(self, text, style, default_width=None, 
-			leftpadding=0, rightpadding=0, toppading=0, bottompadding=0):
+			leftpadding=0, rightpadding=0, toppadding=0, bottompadding=0):
 		
 		super().__init__(text, style)
 		self.default_width = default_width  # Задаём ширину вручную
 		self.leftpadding = leftpadding
 		self.rightpadding = rightpadding
-		self.toppading = toppading
+		self.toppadding = toppadding
 		self.bottompadding = bottompadding
 		self.calculated_height = self.calculate_custom_height()
 		self.default_height = self.get_default_height()
-		
 	
 	def calculate_custom_height(self):
 		"""
@@ -23,7 +22,8 @@ class CustomParagraph(Paragraph):
 			_, self.calculated_height = self.wrap(
 				self.default_width-self.leftpadding-self.rightpadding, 
 				0)  # Используем wrap для пересчета
-			self.calculated_height = self.calculated_height + self.toppading + self.bottompadding
+			self.calculated_height = self.calculated_height + self.toppadding + self.bottompadding
+			
 		else:
 			self.calculated_height = 0
 		return self.calculated_height
@@ -66,3 +66,11 @@ class CustomParagraph(Paragraph):
 			self.default_height = 0
 		
 		return self.default_height
+	
+	def set_padding(self, toppadding=0, bottompadding=0):
+		"""
+		Устанавливает новые значения отступов и пересчитывает высоту.
+		"""
+		self.toppadding = toppadding
+		self.bottompadding = bottompadding
+		self.calculate_custom_height()
