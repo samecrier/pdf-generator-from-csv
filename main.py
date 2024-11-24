@@ -126,9 +126,11 @@ class GeneratePdf():
 
 	def get_height_span_rows(self, max_height_result, span_rows):
 		span_rows_height = 0
+		span_max = []
 		for row_idx in span_rows:
 			span_rows_height += max_height_result[row_idx]
-		return span_rows_height
+			span_max.append(max_height_result[row_idx])
+		return span_rows_height, span_max
 
 
 	def get_span_rows(self, row_idx, col_idx, spans):
@@ -214,7 +216,6 @@ class GeneratePdf():
 		если все содержимое таблицы обернуто в Paragraph.
 		"""
 		row_heights = [0] * len(table._cellvalues)  # Для сохранения высот строк
-		paddings = defaultdict(lambda: {'top': 0, 'bottom': 0})
 		spans = {}
 		colWidths = self.col_widths_points
 		# Сбор данных о PADDINGTOP и PADDINGBOTTOM
@@ -241,23 +242,24 @@ class GeneratePdf():
 						start_row <= row_idx <= end_row and start_col <= col_idx <= end_col
 						for (start_col, start_row), (end_col, end_row) in spans.items()
 					)
-				
 					if is_span_cell:
 						span_lines = self.get_span_lines(row_idx, col_idx, spans)
 						span_rows = self.get_span_rows(row_idx, col_idx, spans)
-						span_rows_height = self.get_height_span_rows(max_height_result, span_rows)
-						required_height_span = span_lines*cell.default_height
-						# if row_idx == 16 and col_idx == 10:
-						# 	print(f"req {required_height_span} lin {span_lines} def {cell.default_height}")
-						# 	print(required_height_span, span_rows_height)
-						if span_rows_height >= height:
-							height = cell.default_height
-						elif span_rows_height < height:
-							height = cell.height/span_lines+cell.toppadding+cell.bottompadding
-						
-					# Учитываем отступы
-					height += paddings[(0, row_idx)]['top'] + paddings[(0, row_idx)]['bottom']
+						span_rows_height, span_max = self.get_height_span_rows(max_height_result, span_rows)
+						paddings = cell.bottompadding+cell.toppadding
+						# print(col_idx, span_rows_height, height)
+						if span_rows_height < height:
+							height = cell.height/span_lines+paddings
+							row_more_height = [x+paddings for x in span_max if x+paddings > height]
+							if row_more_height:
+								new_span_max = [x+paddings for x in span_max if x+paddings <= height]
+								new_span_lines = len(new_span_max)
+								height = (cell.height-sum(row_more_height)+(len(new_span_max)*paddings))/new_span_lines
+						elif span_rows_height >= height:
+							height = cell.default_height+paddings
+					
 					row_heights[row_idx] = max(row_heights[row_idx], height)
+		
 		print(f"sum {sum(row_heights)} {row_heights}")
 		total_height = sum(row_heights)
 		return total_height, row_heights
@@ -409,7 +411,7 @@ class GeneratePdf():
 			loop_counter = 0
 			rows_counter = 0
 
-			while height_to_increase > 0:
+			while height_to_increase > 0.1:
 				loop_counter += 1
 				
 				if loop_counter % 2 == 1:
@@ -670,7 +672,7 @@ class GeneratePdf():
 								test_table = self.generate_test_table(page_list)
 								test_table_height, table_row_heights = self.calculate_table_height_with_span(test_table, self.span_commands)
 								height_to_increase = self.height - test_table_height
-								print(f"увеличить {height_to_increase} height {self.height} test_table {test_table_height}")
+								# print(f"увеличить {height_to_increase} height {self.height} test_table {test_table_height}")
 								self.generate_page(page_list, height_to_increase, table_row_heights)
 								self.move_to_next_page()
 								page_list = self.generate_template_list()
@@ -692,7 +694,7 @@ class GeneratePdf():
 							test_table = self.generate_test_table(page_list)
 							test_table_height, table_row_heights = self.calculate_table_height_with_span(test_table, self.span_commands)
 							height_to_increase = self.height - test_table_height
-							print(f"увеличить {height_to_increase} height {self.height} test_table {test_table_height}")
+							# print(f"увеличить {height_to_increase} height {self.height} test_table {test_table_height}")
 							self.generate_page(page_list, height_to_increase, table_row_heights)
 							self.move_to_next_page()
 							page_list = self.generate_template_list()
@@ -701,7 +703,7 @@ class GeneratePdf():
 			else:
 				if ended_page == None:
 					height_to_increase=self.height-test_table_height
-					print(height_to_increase)
+					# print(height_to_increase)
 					self.generate_page(page_list, height_to_increase=height_to_increase, table_row_heights=table_row_heights)
 					self.move_to_next_page()
 					page_list = self.generate_template_list()
