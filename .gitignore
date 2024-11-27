@@ -1,0 +1,8 @@
+__pycache__/
+/data
+/archieve
+/pdf
+/venv
+/test*
+/main_archieve.py
+/example.pdf
