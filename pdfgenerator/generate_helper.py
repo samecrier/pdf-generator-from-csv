@@ -51,11 +51,11 @@ class GenerateHelper:
 			'Y_1': [cell[1] for cell in model_list],
 			'Y_2': [cell[2] for cell in model_list],
 			'Y_2_transformed': [cell[13] for cell in model_list],
-			'APP_1': [cell[3] for cell in model_list],
-			'APP_2': [cell[4] for cell in model_list],
-			'APP_3': [cell[5] for cell in model_list],
-			'APP_4': [cell[6] for cell in model_list],
-			'APP_5': [cell[7] for cell in model_list],
+			'BODY': [cell[3] for cell in model_list],
+			'ENGINE': [cell[4] for cell in model_list],
+			'APP_1': [cell[5] for cell in model_list],
+			'APP_2': [cell[6] for cell in model_list],
+			'APP_3': [cell[7] for cell in model_list],
 			'PARKING': [cell[8] for cell in model_list],
 			'FR BR': [cell[9] for cell in model_list],
 			'FR DS': [cell[10] for cell in model_list],
@@ -67,18 +67,18 @@ class GenerateHelper:
 			'Y_1': 'min',
 			'Y_2': 'max',
 			'Y_2_transformed': 'max',
-			'APP_1': lambda x: ', '.join(sorted(set(filter(None, x)))), 
+			'BODY': lambda x: ', '.join(sorted(set(filter(None, x)))), 
+			'ENGINE': lambda x: ', '.join(sorted(set(filter(None, x)))),
+			'APP_1': lambda x: ', '.join(sorted(set(filter(None, x)))),
 			'APP_2': lambda x: ', '.join(sorted(set(filter(None, x)))),
 			'APP_3': lambda x: ', '.join(sorted(set(filter(None, x)))),
-			'APP_4': lambda x: ', '.join(sorted(set(filter(None, x)))),
-			'APP_5': lambda x: ', '.join(sorted(set(filter(None, x)))),
 			'PARKING': 'first',
 			'FR BR': 'first',
 			'FR DS': 'first',
 			'RR BR': 'first',
 			'RR DS': 'first'
 		})
-		sorted_grouped_df = grouped_df.sort_values(by=['Y_1', 'APP_1', 'Y_2'], ascending=[True, True, True])
+		sorted_grouped_df = grouped_df.sort_values(by=['Y_1', 'Y_2', 'APP_1'], ascending=[True, True, True])
 		sorted_grouped_df['Y_1'] = sorted_grouped_df['Y_1'].dt.strftime('%y.%m')
 		sorted_grouped_df['Y_2'] = sorted_grouped_df['Y_2_transformed'].apply(
 			lambda x: '~' if x == pd.Timestamp('2060-12-01') else x.strftime("%y.%m")

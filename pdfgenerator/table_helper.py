@@ -224,3 +224,43 @@ class TableHelper:
 						c_rd = []
 		
 		return commands
+	
+	@staticmethod
+	def format_cell_text(text):
+		# Разделяем текст по пробелам
+		words = str(text).split()
+		formatted_lines = []
+		current_line = ''
+
+		for i, word in enumerate(words):
+			# Если слово начинается с "GS-", "GP-", "GD-", "GR-"
+			if word.startswith(("GS-", "GP-", "GD-", "GR-", 'N/A')) or (
+				word.startswith('|') and word.endswith('|')
+				):
+				# Завершаем текущую строку, если она не пуста
+				if current_line:
+					current_line = current_line + '<br />'
+					formatted_lines.append(current_line)
+				else:
+					if formatted_lines != []:
+						if '<br />' not in formatted_lines[-1]:
+							formatted_lines.append('<br />')
+				current_line = word
+			elif word == "or" and i > 0 and words[i - 1].startswith(("GS-", "GP-", "GD-", "GR-")):
+				# Если это "or" и оно следует после указанных префиксов
+				current_line = current_line + ' ' + word + '<br />'
+				formatted_lines.append(current_line)
+				current_line = ''
+			else:
+				# Если это другой текст
+				if current_line:
+					current_line = current_line + '<br />'
+					formatted_lines.append(current_line)
+					current_line = ''
+				formatted_lines.append(word)
+
+		# Добавляем оставшийся текст
+		if current_line:
+			formatted_lines.append(word)
+
+		return ' '.join(formatted_lines)

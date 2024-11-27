@@ -23,10 +23,12 @@ class GeneratePdf():
 
 	def __init__(self, csv_file):
 		data = pd.read_csv(csv_file, sep=';', keep_default_na=False, dtype=str)
+		columns_to_format = ["PARKING", "FRONT BRAKES", "FRONT DISCS", "REAR BRAKES", "REAR DISCS"]
+		for col in columns_to_format:
+			data[col] = data[col].apply(TableHelper.format_cell_text)
 		data['Y_2_transformed'] = data['Y_2'].replace("~", "60.12")
 		data['Y_1'] = pd.to_datetime(data.iloc[:, 2], format="%y.%m", errors='coerce')
 		data['Y_2_transformed'] = pd.to_datetime(data.iloc[:, 14], format="%y.%m", errors='coerce')
-		print(data)
 		values = data.values.tolist()
 		self.brands_dict = defaultdict(list)
 		
