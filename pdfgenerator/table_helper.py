@@ -2,6 +2,7 @@ from pdfgenerator.span_helper import SpanHelper
 from pdfgenerator.custom_paragraph import CustomParagraph
 from pdfgenerator.variables.styles import StylesHelper
 from reportlab.lib import colors
+import pandas as pd
 class TableHelper:
 
 	@staticmethod
@@ -95,6 +96,8 @@ class TableHelper:
 		styles = StylesHelper()
 		commands = []
 
+		c_bd = [] #3
+		c_en = [] #4
 		c_p = [] #8
 		c_fb = [] #9
 		c_fd = [] #10
@@ -110,11 +113,12 @@ class TableHelper:
 				commands.append(('RIGHTPADDING', (0, i), (-1, i), 0))
 				commands.append(('TOPPADDING', (0, i), (-1, i), 0))
 				commands.append(('BOTTOMPADDING', (0, i), (-1, i), 0))
+				commands.append(('SPAN', (2, i), (6, i)))
 			elif value_for_styles[i] == 'brand':
 				commands.append(('BACKGROUND', (0, i), (-1, i), colors.darkkhaki))
 				commands.append(('GRID', (0, i), (-1, i), 0.5, colors.black))
 				commands.append(('SPAN', (0, i), (-1, i)))
-				commands.append(('ALIGN', (0, i), (-1, i), 'LEFT'))
+				commands.append(('ALIGN', (0, i), (-1, i), 'CENTER'))
 				commands.append(('VALIGN', (0, i), (-1, i), 'MIDDLE'))
 				commands.append(('LEFTPADDING', (0, i), (-1, i), 1))
 				commands.append(('RIGHTPADDING', (0, i), (-1, i), 0))
@@ -142,6 +146,38 @@ class TableHelper:
 
 		for a, row in enumerate(list_for_test_table):
 			for i, cell in enumerate(row):
+				if i == 3: #c_bd
+					if isinstance(cell, CustomParagraph):
+						part_text = list_for_test_table[a][i].text
+						if part_text != '':
+							if part_text in c_bd:
+								commands.append(('SPAN', (i-1, a-len(c_bd)), (i-1, a)))
+								commands.append(('GRID', (i-1, a-len(c_bd)), (i-1, a), 0.5, 'black'))
+								c_bd.append(part_text)
+							elif c_bd == []:
+								c_bd.append(part_text)
+							else:
+								c_bd = [part_text]
+						else:
+							c_bd = []
+					else:
+						c_bd = []
+				if i == 4: #c_en
+					if isinstance(cell, CustomParagraph):
+						part_text = list_for_test_table[a][i].text
+						if part_text != '':
+							if part_text in c_en:
+								commands.append(('SPAN', (i-1, a-len(c_en)), (i-1, a)))
+								commands.append(('GRID', (i-1, a-len(c_en)), (i-1, a), 0.5, 'black'))
+								c_en.append(part_text)
+							elif c_en == []:
+								c_en.append(part_text)
+							else:
+								c_en = [part_text]
+						else:
+							c_en = []
+					else:
+						c_en = []
 				if i == 8: #c_p
 					if isinstance(cell, CustomParagraph):
 						part_text = list_for_test_table[a][i].text
@@ -264,3 +300,17 @@ class TableHelper:
 			formatted_lines.append(word)
 
 		return ' '.join(formatted_lines)
+	
+	@staticmethod
+	def edit_app_three(group):
+		if len(group) > 1:
+			# Разбиваем строки APP_3 на множества уникальных элементов
+			all_values = [set(row.split('<br />')) for row in group['APP_3']]
+			# Находим пересекающиеся значения (которые есть во всех строках группы)
+			common_values = set.intersection(*all_values)
+			
+			# Убираем общие значения, оставляя только уникальные для строки
+			group['APP_3'] = group['APP_3'].apply(
+				lambda x: '<br />'.join(word for word in x.split('<br />') if word not in common_values)
+			)
+		return group

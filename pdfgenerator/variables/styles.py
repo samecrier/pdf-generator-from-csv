@@ -14,7 +14,7 @@ class StylesHelper():
 	BRAND_MODEL_RIGHTPADDING = 0
 
 	APPLICATION_LEFTPADDING = 1
-	APPLICATION_RIGHTPADDING = 0
+	APPLICATION_RIGHTPADDING = 1
 	PARTS_TOPPADDING = 1
 	PARTS_BOTTOMPADDING = 1
 
@@ -22,12 +22,14 @@ class StylesHelper():
 		self.styles = getSampleStyleSheet()
 		self.styles["Normal"].fontSize = 8
 		self.styles["Normal"].leading = 10
+		self.styles['Normal'].fontName = 'Helvetica'
 
 	@property
 	def header_style(self):
 		header_style = self.styles["Normal"].clone('Header')
-		# self.header_style.fontSize = 8
-		# self.header_style.leading = 10
+		header_style.alignment = TA_CENTER
+		header_style.fontSize = 8
+		header_style.leading = 10
 		return header_style
 
 	@property
@@ -46,7 +48,14 @@ class StylesHelper():
 		return application_style
 
 	@property
+	def application_center_style(self):
+		application_style = self.styles["Normal"].clone('App')
+		application_style.alignment = TA_CENTER
+		return application_style
+
+	@property
 	def parts_style(self):
 		parts_style = self.styles["Normal"].clone('Parts')
 		parts_style.alignment = TA_CENTER
 		return parts_style
+	

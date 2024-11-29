@@ -17,7 +17,12 @@ from pdfgenerator.variables.styles import StylesHelper
 from pdfgenerator.variables.variables import EXCEL_WIDTH_POINTS
 
 import time
-# pdfmetrics.registerFont(TTFont("Consolas", "data/consola.ttf"))
+pdfmetrics.registerFont(TTFont("Consolas", "fonts/consola.ttf"))
+pdfmetrics.registerFont(TTFont("Dejavu", "fonts/DejaVuSansMono.ttf"))
+pdfmetrics.registerFont(TTFont("Calibri", "fonts/calibri.ttf"))
+pdfmetrics.registerFont(TTFont("NotoSans", "fonts/NotoSans-Regular.ttf"))
+pdfmetrics.registerFont(TTFont("Meiryo", "fonts/meiryo.ttf"))
+
 
 class GeneratePdf():
 
@@ -28,6 +33,7 @@ class GeneratePdf():
 			data[col] = data[col].apply(TableHelper.format_cell_text)
 		data['Y_2_transformed'] = data['Y_2'].replace("~", "60.12")
 		data['Y_1'] = pd.to_datetime(data.iloc[:, 2], format="%y.%m", errors='coerce')
+		data['Y_2'] = pd.to_datetime(data.iloc[:, 3], format="%y.%m", errors='coerce')
 		data['Y_2_transformed'] = pd.to_datetime(data.iloc[:, 14], format="%y.%m", errors='coerce')
 		values = data.values.tolist()
 		self.brands_dict = defaultdict(list)
@@ -80,7 +86,7 @@ class GeneratePdf():
 		return helper
 	@timer
 	def generate_pdf_2(self):
-		doc = self.create_doc('pdf/new_mock.pdf')
+		doc = self.create_doc('pdf/draft_mock.pdf')
 		helper = GenerateHelper()
 		for brand in self.brands_dict:
 			brand_data_row = self.brands_dict[brand]
